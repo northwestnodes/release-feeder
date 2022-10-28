@@ -6,6 +6,11 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Properties\ServiceDependencies\**" />
+    <EmbeddedResource Remove="Properties\ServiceDependencies\**" />
+    <None Remove="Properties\ServiceDependencies\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="feeds.json" />
   </ItemGroup>
   <ItemGroup>
