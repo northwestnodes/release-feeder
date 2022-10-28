@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NorthWestNodes.ReleaseFeeder.Daemon.Sinks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,8 @@ namespace NorthWestNodes.ReleaseFeeder.Daemon.Feeds
 {
     public class GithubRssFeed : BaseRssFeed
     {
-        private string previousTitle;
-        private string previousUrl;
+        private string previousVersion;
+        private string previousReleaseUrl;
 
         public GithubRssFeed(string name, string url) : base(name, url)
         {
@@ -30,51 +31,30 @@ namespace NorthWestNodes.ReleaseFeeder.Daemon.Feeds
             var orderedItems = feed.Items.OrderByDescending(x => x.LastUpdatedTime);
             var latestItem = orderedItems.FirstOrDefault();
 
-            if (string.IsNullOrEmpty(previousTitle))
+            if (string.IsNullOrEmpty(previousVersion))
             {
-                previousTitle = latestItem.Title?.Text?.Trim();
-                previousUrl = latestItem.Links.FirstOrDefault()?.Uri?.ToString()?.Trim();
-                Console.WriteLine($"Github RSS feed {feed.Id}: set version to {previousTitle} at {previousUrl}");
+                previousVersion = latestItem.Title?.Text?.Trim();
+                previousReleaseUrl = latestItem.Links.FirstOrDefault()?.Uri?.ToString()?.Trim();
+                Console.WriteLine($"Github RSS feed {feed.Id}: set version to {previousVersion} at {previousReleaseUrl}");
                 return;
             }
 
-            string currentTitle = latestItem.Title?.Text?.Trim();
-            string currentUrl = latestItem.Links.FirstOrDefault()?.Uri?.ToString()?.Trim();
-            
-            //Console.WriteLine($"Github RSS feed {feed.Id}: current version is {currentTitle}, previous version is {previousTitle}");
+            string currentVersion = latestItem.Title?.Text?.Trim();
+            string currentReleaseUrl = latestItem.Links.FirstOrDefault()?.Uri?.ToString()?.Trim();
 
-            if (currentTitle != previousTitle && currentUrl != previousUrl)
+            if (currentVersion != previousVersion && currentReleaseUrl != previousReleaseUrl)
             {
-                previousTitle = currentTitle;
-                previousUrl = currentUrl;
+                previousVersion = currentVersion;
+                previousReleaseUrl = currentReleaseUrl;
 
-                Console.WriteLine($"Github RSS feed {feed.Id}: new version detected, sending notification to Slack webhook");
+                Console.WriteLine($"Github RSS feed {feed.Id}: new version detected, sending notifications");
 
-                using (HttpClient httpClient = new HttpClient())
-                {
-                    SlackMessageObject githubMessageObject = new SlackMessageObject
-                    {
-                        Text = $"New release published: `{Name} - {currentTitle}` at {currentUrl}"
-                    };
-
-                    string slackWebhookUrl = Environment.GetEnvironmentVariable("slackWebhookUrl");
-                    if (string.IsNullOrEmpty(slackWebhookUrl))
-                    {
-                        Console.WriteLine($"Github RSS feed {feed.Id}: Slack webhook URL is empty");
-                    }
-
-                    string githubMessageJson = JsonConvert.SerializeObject(githubMessageObject);
-                    StringContent stringContent = new StringContent(githubMessageJson, Encoding.UTF8, "application/json");
-                    var response = await httpClient.PostAsync(slackWebhookUrl, stringContent);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        Console.WriteLine($"Github RSS feed {feed.Id}: http status code {response.StatusCode} received while posting Slack message: {response.ReasonPhrase}");
-                    }
-                }
+                SlackWebhookSink slackWebhookSink = new SlackWebhookSink();
+                await slackWebhookSink.Dispatch(Name, currentReleaseUrl, currentVersion);
             }
             else
             {
-                Console.WriteLine($"Github RSS feed {feed.Id}: version is still the same, {currentTitle} = {previousTitle}");
+                Console.WriteLine($"Github RSS feed {feed.Id}: version is still the same, {currentVersion} = {previousVersion}");
             }
         }
     }

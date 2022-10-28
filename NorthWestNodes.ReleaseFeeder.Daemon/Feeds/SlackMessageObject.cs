@@ -11,5 +11,14 @@ namespace NorthWestNodes.ReleaseFeeder.Daemon.Feeds
     {
         [JsonProperty("text")]
         public string Text { get; set; }
+
+        public SlackMessageObject()
+        {
+        }
+
+        public SlackMessageObject(string text)
+        {
+            this.Text = text;
+        }
     }
 }

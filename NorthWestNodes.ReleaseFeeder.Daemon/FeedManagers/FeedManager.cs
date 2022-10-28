@@ -25,7 +25,7 @@ namespace NorthWestNodes.ReleaseFeeder.Daemon.FeedManagers
 
         public async Task LoadFeeds()
         {
-            string feedsUrl = "https://stwesteumisc.blob.core.windows.net/$web/feeds.json?sp=r&st=2022-10-27T18:55:41Z&se=2032-10-28T02:55:41Z&spr=https&sv=2021-06-08&sr=b&sig=tfIctpWI4SOYQni3iU3kPCDBfI4ZsvscIGvo42ny28o%3D";
+            string feedsUrl = Environment.GetEnvironmentVariable("feedsUrl");
             string feedsJson = null;
             using (HttpClient httpClient = new HttpClient())
             {
