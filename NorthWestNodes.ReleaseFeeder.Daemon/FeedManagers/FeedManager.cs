@@ -98,7 +98,8 @@ namespace NorthWestNodes.ReleaseFeeder.Daemon.FeedManagers
                     }
                 }
 
-                await Task.Delay(1800 * 1000);
+                int intervalInSeconds = Convert.ToInt32(Environment.GetEnvironmentVariable("intervalInSeconds"));
+                await Task.Delay(intervalInSeconds * 1000);
             }
         }
 
