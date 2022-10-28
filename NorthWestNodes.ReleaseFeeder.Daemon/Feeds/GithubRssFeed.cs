@@ -42,16 +42,17 @@ namespace NorthWestNodes.ReleaseFeeder.Daemon.Feeds
             string currentVersion = latestItem.Title?.Text?.Trim();
             string currentReleaseUrl = latestItem.Links.FirstOrDefault()?.Uri?.ToString()?.Trim();
 
-            bool isDifferentVersion = currentVersion.Equals(previousVersion, StringComparison.OrdinalIgnoreCase);
-            bool isDifferentReleaseUrl = currentReleaseUrl.Equals(previousReleaseUrl, StringComparison.OrdinalIgnoreCase);
+            bool isDifferentVersion = !currentVersion.Equals(previousVersion, StringComparison.OrdinalIgnoreCase);
+            bool isDifferentReleaseUrl = !currentReleaseUrl.Equals(previousReleaseUrl, StringComparison.OrdinalIgnoreCase);
 
-            if (isDifferentVersion || isDifferentReleaseUrl)
+            if (isDifferentVersion && isDifferentReleaseUrl)
             {
                 previousVersion = currentVersion;
                 previousReleaseUrl = currentReleaseUrl;
 
                 SlackWebhookSink slackWebhookSink = new SlackWebhookSink();
                 await slackWebhookSink.Dispatch(Name, currentReleaseUrl, currentVersion);
+                //Console.WriteLine($"NOTIFICATION FOR {Name}");
             }
         }
     }
