@@ -1,0 +1,12 @@
+{
+  "rss": {
+    "github": [
+      "https://github.com/docker/cli/releases.atom",
+      "https://github.com/docker/compose/releases.atom",
+      "https://github.com/ava-labs/avalanchego/releases.atom",
+      "https://github.com/OffchainLabs/nitro/releases.atom",
+      "https://github.com/ethereum/go-ethereum/releases.atom",
+      "https://github.com/smartcontractkit/external-adapters-js/releases.atom"
+    ]
+  }
+}
