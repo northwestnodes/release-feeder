@@ -42,19 +42,16 @@ namespace NorthWestNodes.ReleaseFeeder.Daemon.Feeds
             string currentVersion = latestItem.Title?.Text?.Trim();
             string currentReleaseUrl = latestItem.Links.FirstOrDefault()?.Uri?.ToString()?.Trim();
 
-            if (currentVersion != previousVersion && currentReleaseUrl != previousReleaseUrl)
+            bool isDifferentVersion = currentVersion.Equals(previousVersion, StringComparison.OrdinalIgnoreCase);
+            bool isDifferentReleaseUrl = currentReleaseUrl.Equals(previousReleaseUrl, StringComparison.OrdinalIgnoreCase);
+
+            if (isDifferentVersion || isDifferentReleaseUrl)
             {
                 previousVersion = currentVersion;
                 previousReleaseUrl = currentReleaseUrl;
 
-                Console.WriteLine($"Github RSS feed {feed.Id}: new version detected, sending notifications");
-
                 SlackWebhookSink slackWebhookSink = new SlackWebhookSink();
                 await slackWebhookSink.Dispatch(Name, currentReleaseUrl, currentVersion);
-            }
-            else
-            {
-                Console.WriteLine($"Github RSS feed {feed.Id}: version is still the same, {currentVersion} = {previousVersion}");
             }
         }
     }
